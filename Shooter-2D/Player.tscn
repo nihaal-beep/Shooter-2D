@@ -1,0 +1,59 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://spaceship.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Area2D
+signal bhit
+signal hit
+var check=0
+var speed=400.0
+var screen_size=Vector2.ZERO
+func _ready():
+	screen_size=get_viewport_rect().size
+	print(screen_size)
+var bullet = preload(\"res://Bullet.tscn\")
+func _process(delta):
+	var direction = Vector2.ZERO
+	if Input.is_action_pressed(\"ui_right\"):
+		direction.x=1
+	if Input.is_action_pressed('ui_left'):
+		direction.x=-1
+	position += direction*speed*delta
+	
+	position.x=clamp(position.x,0,screen_size.x)
+	if Input.is_action_just_pressed(\"ui_accept\"):
+		shoot()
+
+
+
+
+func _on_Player_body_entered(_body):
+	hide()
+	$CollisionShape2D.set_deferred('disabled',true)
+	emit_signal('hit')
+func shoot():
+	print ('ok')
+	var b= bullet.instance()
+	b.start(position)	
+	get_parent().add_child(b)
+	
+"
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 32.2403, 34.7894 )
+
+[node name="Player" type="Area2D"]
+position = Vector2( 259.192, 599.01 )
+script = SubResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 1 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 2 )
+
+[node name="muzzle" type="Position2D" parent="."]
+position = Vector2( 8.38251, 512.699 )
+
+[connection signal="body_entered" from="." to="." method="_on_Player_body_entered"]
